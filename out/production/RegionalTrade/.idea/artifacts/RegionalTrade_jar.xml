@@ -1,0 +1,10 @@
+<component name="ArtifactManager">
+  <artifact type="jar" build-on-make="true" name="RegionalTrade:jar">
+    <output-path>$PROJECT_DIR$/../paper-server/plugins</output-path>
+    <root id="archive" name="RegionalTrade.jar">
+      <element id="module-output" name="RegionalTrade" />
+      <element id="extracted-dir" path="$PROJECT_DIR$/../Dependencies/spigot-api-1.16.4-R0.1-SNAPSHOT-shaded.jar" path-in-jar="/" />
+      <element id="file-copy" path="$PROJECT_DIR$/../Dependencies/spigot-api-1.16.4-R0.1-SNAPSHOT-shaded.jar" />
+    </root>
+  </artifact>
+</component>
