@@ -1,30 +1,28 @@
 package io.sandbox.regionalTrade;
 
+import io.sandbox.helpers.Output;
 import io.sandbox.regionalTrade.events.RegionalTradeEventHandlers;
 
-import java.util.logging.Logger;
-
-import org.bukkit.ChatColor;
 import org.bukkit.Server;
 import org.bukkit.plugin.java.JavaPlugin;
 
 public class Main extends JavaPlugin {
 	Server server;
-	Logger logger;
+	Output output;
     public static final String MOD_ID = "RegionalTrade";
 
     @Override
     public void onEnable() {
     	server = getServer();
-		logger = server.getLogger();
+		output = new Output(server);
         server.getPluginManager().registerEvents(new RegionalTradeEventHandlers(this), this);
-        server.getConsoleSender().sendMessage(ChatColor.GREEN + "Regional Trade has been initiated!");
+        output.consoleSuccess("Regional Trade has been initiated!");
         this.loadConfig();
     }
 
     @Override
     public void onDisable() {
-        getServer().getConsoleSender().sendMessage(ChatColor.RED + "Plugin is disabled!");
+    	output.consoleError("Plugin is disabled!");
     }
 
     public void loadConfig() {
