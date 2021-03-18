@@ -1,32 +1,19 @@
 package io.sandbox.regionalTrade.events;
 
+import io.sandbox.helpers.ItemHelper;
 import io.sandbox.regionalTrade.Main;
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
-import org.bukkit.NamespacedKey;
-import org.bukkit.block.Biome;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.file.FileConfiguration;
-import org.bukkit.configuration.file.FileConfigurationOptions;
 import org.bukkit.enchantments.Enchantment;
-import org.bukkit.entity.HumanEntity;
 import org.bukkit.entity.Villager;
 import org.bukkit.event.EventHandler;
-import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.entity.VillagerAcquireTradeEvent;
-import org.bukkit.event.inventory.InventoryOpenEvent;
-import org.bukkit.event.inventory.InventoryType;
-import org.bukkit.inventory.EquipmentSlot;
-import org.bukkit.inventory.Inventory;
-import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.MerchantRecipe;
 import org.bukkit.inventory.meta.EnchantmentStorageMeta;
-import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.plugin.Plugin;
-import org.bukkit.plugin.java.JavaPlugin;
-
-import java.lang.reflect.Array;
 import java.util.*;
 
 import static org.bukkit.Bukkit.getServer;
@@ -69,8 +56,7 @@ public class RegionalTradeEventHandlers implements Listener {
                     Map<Enchantment, Integer> allowedEnchants = new HashMap<>();
                     for (String enchantName : allowedEnchantNames) {
                         getServer().getConsoleSender().sendMessage(ChatColor.BLUE + enchantName);
-                        // Couldn't get getByKey to work... must not be using it right...
-                        Enchantment enchantment = Enchantment.getByName(enchantName);
+                        Enchantment enchantment = ItemHelper.resolveEnchant(enchantName);
                         Integer level = allowedEnchantsConfig.getInt(enchantName);
                         allowedEnchants.put(enchantment, level);
                     }
@@ -90,7 +76,7 @@ public class RegionalTradeEventHandlers implements Listener {
                                 int selectedEnchantIndex = this.getRandomNumberUsingInts(0, allowedEnchants.size() - 1);
 
                                 storedEnchantMeta.removeStoredEnchant(enchant.getKey());
-                                ArrayList<Enchantment> randomEnchant = new ArrayList(allowedEnchants.keySet());
+                                ArrayList<Enchantment> randomEnchant = new ArrayList<Enchantment>(allowedEnchants.keySet());
                                 Enchantment selectedEnchant = randomEnchant.get(selectedEnchantIndex);
                                 Integer level = enchant.getValue() > selectedEnchant.getMaxLevel() ? selectedEnchant.getMaxLevel() : enchant.getValue();
                                 getServer().getConsoleSender().sendMessage(ChatColor.GREEN + selectedEnchant.toString() + " : " + level);
