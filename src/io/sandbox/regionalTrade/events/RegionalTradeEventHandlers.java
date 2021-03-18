@@ -40,37 +40,6 @@ public class RegionalTradeEventHandlers implements Listener {
     }
 
     @EventHandler
-    public void onOpenTradeWindow(InventoryOpenEvent event) {
-        HumanEntity player = event.getPlayer();
-        Inventory inventory =  event.getInventory();
-        if (
-            inventory.getType() == InventoryType.MERCHANT &&
-            inventory.getHolder() instanceof Villager
-        ) {
-            List<MerchantRecipe> recipes = ((Villager) inventory.getHolder()).getRecipes();
-            player.sendMessage("Trade count: " + recipes.size());
-            for (MerchantRecipe recipe : recipes) {
-                if (recipe.getResult().getType() != Material.ENCHANTED_BOOK) {
-                    continue;
-                }
-                EnchantmentStorageMeta storedEnchants = (EnchantmentStorageMeta) recipe.getResult().getItemMeta();
-                Map<Enchantment, Integer> existingEnchants = storedEnchants.getStoredEnchants();
-                player.sendMessage(String.valueOf(existingEnchants.size()) + " is the count");
-                if (existingEnchants.size() > 0) {
-                    for (Map.Entry<Enchantment, Integer> enchant : existingEnchants.entrySet()) {
-                        player.sendMessage(enchant.getKey().toString());
-//                        getServer().getConsoleSender().sendMessage(ChatColor.BLUE + "hit");
-//                        if (allowedEnchants.contains(Enchantment.getByKey(enchant.getKey()))) {
-//                            isAllowed = true;
-//                            enchantLevel = recipe.getResult().getEnchantments().get(enchant.toString());
-//                        }
-                    }
-                }
-            }
-        }
-    }
-
-    @EventHandler
     public void onVillagerAcquiresTrade(VillagerAcquireTradeEvent event) {
         Villager merchant = (Villager)event.getEntity();
         Villager.Profession villagerProfession = merchant.getProfession();
@@ -93,44 +62,42 @@ public class RegionalTradeEventHandlers implements Listener {
                 ConfigurationSection biome = profession.getConfigurationSection(villagerBiome.toString().toLowerCase());
 
                 if (biome.isSet("allowedEnchants")) {
-                    Set<String> allowedEnchants = biome.getConfigurationSection("allowedEnchants").getKeys(false);
-                    // TODO: make this into a map instead of a bool, to handle multiple enchants
-                    Boolean isAllowed = false; // to be added list?
-                    // TODO: same as above, or just combine the two, Map<Enchantment, Integer>
-                    int enchantLevel = 1;
-
-                    EnchantmentStorageMeta storedEnchants = (EnchantmentStorageMeta) recipe.getResult().getItemMeta();
-                    Map<Enchantment, Integer> existingEnchants = storedEnchants.getStoredEnchants();
-
-                    if (existingEnchants.size() > 0) {
-                        for (Map.Entry<Enchantment, Integer> enchant : existingEnchants.entrySet()) {
-                            if (allowedEnchants.contains(enchant.getKey().toString())) { // TODO: Not sure what this string looks like, check line 121 for enchant name stuff
-                                isAllowed = true;
-                                enchantLevel = recipe.getResult().getEnchantments().get(enchant.toString());
-                            } else {
-                                // TODO: remove it from the existingEnchants storedEnchants.removeStoredEnchant()
-                            }
-                        }
+                    getServer().getConsoleSender().sendMessage(ChatColor.BLUE + "What is null 1");
+                    ConfigurationSection allowedEnchantsConfig = biome.getConfigurationSection("allowedEnchants");
+                    getServer().getConsoleSender().sendMessage(ChatColor.BLUE + "What is null 2");
+                    Set<String> allowedEnchantNames = allowedEnchantsConfig.getKeys(false);
+                    Map<Enchantment, Integer> allowedEnchants = new HashMap<>();
+                    for (String enchantName : allowedEnchantNames) {
+                        getServer().getConsoleSender().sendMessage(ChatColor.BLUE + enchantName);
+                        // Couldn't get getByKey to work... must not be using it right...
+                        Enchantment enchantment = Enchantment.getByName(enchantName);
+                        Integer level = allowedEnchantsConfig.getInt(enchantName);
+                        allowedEnchants.put(enchantment, level);
                     }
 
-                    // TODO: turn this into a loop over the isAllowed Map and reset/remove any enchants not allowed
-                    if (!isAllowed) {
-                        // pick a random enchant, maybe need to remove any that exist on the book already
-                        int selectedEnchantIndex = this.getRandomNumberUsingInts(0, allowedEnchants.size() - 1);
-                        String updatedEnchantmentName = allowedEnchants.toArray()[selectedEnchantIndex].toString();
+                    // Enchants to replace and their level
+                    Map<Enchantment, Integer> enchantmentsToReplace = new HashMap<Enchantment, Integer>();
 
-                        // Turn it into an Enchantment from name
-                        Enchantment enchantment = Enchantment.getByKey(NamespacedKey.minecraft(updatedEnchantmentName));
+                    // The set of enchants on the book (it's not actually enchanted...)
+                    EnchantmentStorageMeta storedEnchantMeta = ((EnchantmentStorageMeta) recipe.getResult().getItemMeta());
+                    Map<Enchantment, Integer> storedEnchants = storedEnchantMeta.getStoredEnchants();
 
-                        // Check max level of selected enchant
-                        int maxLevel = enchantment.getMaxLevel();
+                    if (storedEnchants.size() > 0) {
+                        for (Map.Entry<Enchantment, Integer> enchant : storedEnchants.entrySet()) {
+                            getServer().getConsoleSender().sendMessage(ChatColor.BLUE + enchant.getKey().toString());
+                            if (!allowedEnchants.containsKey(enchant.getKey())) {
+                                // TODO: remove it from the existingEnchants storedEnchants.removeStoredEnchant()
+                                int selectedEnchantIndex = this.getRandomNumberUsingInts(0, allowedEnchants.size() - 1);
 
-                        // reduce level to max if over
-                        if (enchantLevel > maxLevel) {
-                            enchantLevel = maxLevel;
+                                storedEnchantMeta.removeStoredEnchant(enchant.getKey());
+                                ArrayList<Enchantment> randomEnchant = new ArrayList(allowedEnchants.keySet());
+                                Enchantment selectedEnchant = randomEnchant.get(selectedEnchantIndex);
+                                Integer level = enchant.getValue() > selectedEnchant.getMaxLevel() ? selectedEnchant.getMaxLevel() : enchant.getValue();
+                                getServer().getConsoleSender().sendMessage(ChatColor.GREEN + selectedEnchant.toString() + " : " + level);
+                                storedEnchantMeta.addStoredEnchant(selectedEnchant, level, false);
+                                // TODO: add a new trade... because you can't change the result?
+                            }
                         }
-
-                        // TODO: Add the enchant to the book "storedEnchants.addStoredEnchant()"
                     }
 
                     getServer().getConsoleSender().sendMessage(ChatColor.BLUE + "Book was added successfully... I think");
