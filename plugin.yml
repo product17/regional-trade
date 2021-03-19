@@ -1,5 +1,5 @@
 name: RegionalTrade
-version: 0.0.0
+version: 0.0.1
 author: product99
 main: io.sandbox.regionalTrade.Main
 api-version: 1.16

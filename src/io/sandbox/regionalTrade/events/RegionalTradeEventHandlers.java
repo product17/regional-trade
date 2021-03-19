@@ -11,6 +11,7 @@ import org.bukkit.entity.Villager;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.entity.VillagerAcquireTradeEvent;
+import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.MerchantRecipe;
 import org.bukkit.inventory.meta.EnchantmentStorageMeta;
 import java.util.*;
@@ -48,9 +49,6 @@ public class RegionalTradeEventHandlers implements Listener {
         for (Enchantment enchant : storedEnchantMeta.getStoredEnchants().keySet()) { // This will loop even though in this case it would always only be one item.
         	// We can leave early if the merchant is allowed to learn the enchant.
         	if (config.canLearn(profession, villagerBiome, enchant)) { return; }
-        	
-        	// Otherwise let's remove the enchant.
-        	storedEnchantMeta.removeStoredEnchant(enchant);
         }
         
         // Select a new enchantment.
@@ -61,12 +59,16 @@ public class RegionalTradeEventHandlers implements Listener {
         // Select a new enchantment level.
         Integer level = this.getRandomNumberUsingInts(1, selectedEnchant.getMaxLevel());
         
-        // Add the enchantment to the enchant meta.
-        storedEnchantMeta.addStoredEnchant(selectedEnchant, level, false);
-        output.consoleSuccess(selectedEnchant.toString() + ": " + level);
+        // Create a new result book item and add the enchant we selected to it.
+        ItemStack newBook = new ItemStack(Material.ENCHANTED_BOOK);
+        newBook.addEnchantment(selectedEnchant, level);
         
-        // TODO: Replace the trade!
-//        MerchantRecipe newRecipe = new MerchantRecipe(recipe.getResult(), 1);
-        event.setRecipe(recipe);
+        // Create a new recipe, set its ingredients.
+        MerchantRecipe newRecipe = new MerchantRecipe(newBook, 1);
+        newRecipe.addIngredient(new ItemStack(Material.BOOK));
+        newRecipe.addIngredient(new ItemStack(Material.EMERALD, 3));
+        
+        // Finally, set the resulting recipe to the event.
+        event.setRecipe(newRecipe);
     }
 }
