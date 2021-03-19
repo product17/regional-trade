@@ -119,16 +119,16 @@ public class RegionalTradeEventHandlers implements Listener {
             String levelName = "";
             switch (levelOffset) {
             case 1:
-            	levelName = "APPRENTICE (2)";
+            	levelName = "APPRENTICE [2]";
             	break;
             case 2:
-            	levelName = "JOURNEYMAN (3)";
+            	levelName = "JOURNEYMAN [3]";
             	break;
             case 3:
-            	levelName = "EXPERT (4)";
+            	levelName = "EXPERT [4]";
             	break;
             case 4:
-            	levelName = "MASTER (5)";
+            	levelName = "MASTER [5]";
             }
             storedEnchantMeta.addStoredEnchant(selectedEnchant, 1, false);
             storedEnchantMeta.setDisplayName("UNLOCK  @  " + levelName);
