@@ -41,33 +41,41 @@ public class RegionalTradeEventHandlers implements Listener {
         case LIBRARIAN:
         	switch (recipe.getResult().getType()) {
         	case ENCHANTED_BOOK:
-        		enchantingTradeHandler(event, recipe, profession, villagerBiome);
+        		enchantingTradeHandler(event, recipe, merchant, profession, villagerBiome);
         	default:
         	}
         default:
         }
     }
     
-    private void enchantingTradeHandler(VillagerAcquireTradeEvent event, MerchantRecipe recipe, Villager.Profession profession, Villager.Type villagerBiome) {
+    private void enchantingTradeHandler(VillagerAcquireTradeEvent event, MerchantRecipe recipe, Villager merchant, Villager.Profession profession, Villager.Type villagerBiome) {
     	// If there are no allowed enchants listed then we should allow the default game behavior.
     	ArrayList<Enchantment> allowedEnchants = config.enchantList(profession, villagerBiome);
         if (allowedEnchants.isEmpty()) { return; }
-    	
+        
+        Enchantment selectedEnchant = null;
     	EnchantmentStorageMeta storedEnchantMeta = ((EnchantmentStorageMeta) recipe.getResult().getItemMeta());
         for (Enchantment enchant : storedEnchantMeta.getStoredEnchants().keySet()) { // This will loop even though in this case it would always only be one item.
         	// We want the curses to just always be allowed on everything.
         	if (enchant == Enchantment.BINDING_CURSE || enchant == Enchantment.VANISHING_CURSE) { return; }
         	
         	// We can leave early if the merchant is allowed to learn the enchant.
-        	if (config.canLearn(profession, villagerBiome, enchant)) { return; }
+        	if (config.canLearn(profession, villagerBiome, enchant)) {
+        		selectedEnchant = enchant;
+        	}
         }
         
-        // Select a new enchantment.
-        int selectedEnchantIndex = ItemHelper.getRandomInt(0, allowedEnchants.size() - 1);
-        Enchantment selectedEnchant = allowedEnchants.get(selectedEnchantIndex);
+        // Select a new enchantment if the one we had was not allowed.
+        if (selectedEnchant == null) {
+        	int selectedEnchantIndex = ItemHelper.getRandomInt(0, allowedEnchants.size() - 1);
+        	selectedEnchant = allowedEnchants.get(selectedEnchantIndex);
+        }
         
         // Select a new enchantment level.
-        Integer level = ItemHelper.getRandomInt(1, selectedEnchant.getMaxLevel());
+        Integer level = merchant.getVillagerLevel();
+        if (level > selectedEnchant.getMaxLevel()) {
+        	level = selectedEnchant.getMaxLevel();
+        }
         
         // Create a new result book item and add the enchant we selected to it.
         ItemStack newBook = new ItemStack(Material.ENCHANTED_BOOK);
