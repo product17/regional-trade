@@ -66,9 +66,10 @@ public class RegionalTradeEventHandlers implements Listener {
     	EnchantmentStorageMeta storedEnchantMeta = null;
     	
     	for (MerchantRecipe ownedRecipe : merchant.getRecipes()) {
-    		if (ownedRecipe.getResult().getType() != Material.ENCHANTED_BOOK) { continue; }
+    		ItemStack ownedResult = ownedRecipe.getResult();
+    		if (ownedResult.getType() != Material.ENCHANTED_BOOK) { continue; }
     		
-    		storedEnchantMeta = (EnchantmentStorageMeta) recipe.getResult().getItemMeta();
+    		storedEnchantMeta = (EnchantmentStorageMeta) ownedResult.getItemMeta();
             for (Enchantment enchant : storedEnchantMeta.getStoredEnchants().keySet()) { // This will loop even though in this case it would always only be one item.
             	selectedEnchant = enchant;
             	break;
