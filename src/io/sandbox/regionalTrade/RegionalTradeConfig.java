@@ -13,17 +13,17 @@ public class RegionalTradeConfig {
 		enchantSets = new HashMap<Villager.Profession, HashMap<Villager.Type, ArrayList<Enchantment>>>();
 	}
 	
-	private ArrayList<Enchantment> enchantList(Villager.Profession profession, Villager.Type type) {
+	public ArrayList<Enchantment> enchantList(Villager.Profession profession, Villager.Type villagerBiome) {
 		HashMap<Villager.Type, ArrayList<Enchantment>> typeSet = enchantSets.get(profession);
 		if (typeSet == null) {
 			typeSet = new HashMap<Villager.Type, ArrayList<Enchantment>>();
 			enchantSets.put(profession, typeSet);
 		}
 		
-		ArrayList<Enchantment> enchantments = typeSet.get(type);
+		ArrayList<Enchantment> enchantments = typeSet.get(villagerBiome);
 		if (enchantments == null) {
 			enchantments = new ArrayList<Enchantment>();
-			typeSet.put(type, enchantments);
+			typeSet.put(villagerBiome, enchantments);
 		}
 		
 		return enchantments;

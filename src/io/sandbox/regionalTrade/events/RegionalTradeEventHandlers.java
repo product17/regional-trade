@@ -1,5 +1,6 @@
 package io.sandbox.regionalTrade.events;
 
+import io.sandbox.helpers.ItemHelper;
 import io.sandbox.helpers.Output;
 import io.sandbox.regionalTrade.Main;
 import io.sandbox.regionalTrade.RegionalTradeConfig;
@@ -14,6 +15,7 @@ import org.bukkit.event.entity.VillagerAcquireTradeEvent;
 import org.bukkit.inventory.MerchantRecipe;
 import org.bukkit.inventory.meta.EnchantmentStorageMeta;
 import java.util.*;
+import java.util.Map.Entry;
 
 public class RegionalTradeEventHandlers implements Listener {
 	Main main;
@@ -28,7 +30,7 @@ public class RegionalTradeEventHandlers implements Listener {
 		config = tradeConfig;
 	}
 
-    public int getRandomNumberUsingInts(int min, int max) {
+    private int getRandomNumberUsingInts(int min, int max) {
         Random random = new Random();
         return random.ints(min, max).findFirst().getAsInt();
     }
@@ -45,21 +47,30 @@ public class RegionalTradeEventHandlers implements Listener {
         Villager.Type villagerBiome = merchant.getVillagerType();
 
         EnchantmentStorageMeta storedEnchantMeta = ((EnchantmentStorageMeta) recipe.getResult().getItemMeta());
+        Enchantment enchantToRemove;
+        Integer enchantToRemoveLevel;
         for (Enchantment enchant : storedEnchantMeta.getStoredEnchants().keySet()) { // This will loop even though in this case it would always only be one item.
         	// We can leave early if the merchant is allowed to learn the enchant.
         	if (config.canLearn(profession, villagerBiome, enchant)) { return; }
+        	
+        	// Otherwise let's remove the enchant.
+        	storedEnchantMeta.removeStoredEnchant(enchant);
         }
         
-        // Here we can say that the merchant was NOT allowed to learn the enchant, so we need to swap it out.
-        // TODO: remove it from the existingEnchants storedEnchants.removeStoredEnchant()
-//        int selectedEnchantIndex = this.getRandomNumberUsingInts(0, allowedEnchants.size() - 1);
-//
-//        storedEnchantMeta.removeStoredEnchant(enchant.getKey());
-//        ArrayList<Enchantment> randomEnchant = new ArrayList<Enchantment>(allowedEnchants.keySet());
-//        Enchantment selectedEnchant = randomEnchant.get(selectedEnchantIndex);
-//        Integer level = enchant.getValue() > selectedEnchant.getMaxLevel() ? selectedEnchant.getMaxLevel() : enchant.getValue();
-//        output.consoleSuccess(selectedEnchant.toString() + " : " + level);
-//        storedEnchantMeta.addStoredEnchant(selectedEnchant, level, false);
-        // TODO: add a new trade... because you can't change the result?
+        // Select a new enchantment.
+        ArrayList<Enchantment> allowedEnchants = config.enchantList(profession, villagerBiome);
+        int selectedEnchantIndex = this.getRandomNumberUsingInts(0, allowedEnchants.size() - 1);
+        Enchantment selectedEnchant = allowedEnchants.get(selectedEnchantIndex);
+        
+        // Select a new enchantment level.
+        Integer level = this.getRandomNumberUsingInts(1, selectedEnchant.getMaxLevel());
+        
+        // Add the enchantment to the enchant meta.
+        storedEnchantMeta.addStoredEnchant(selectedEnchant, level, false);
+        output.consoleSuccess(selectedEnchant.toString() + ": " + level);
+        
+        // TODO: Replace the trade!
+//        MerchantRecipe newRecipe = new MerchantRecipe(recipe.getResult(), 1);
+        event.setRecipe(recipe);
     }
 }
