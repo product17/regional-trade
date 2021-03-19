@@ -18,7 +18,7 @@ import java.util.*;
 public class RegionalTradeEventHandlers implements Listener {
 	Main main;
 	Server server;
-	OutputTo output;
+	OutputHelper output;
 	RegionalTradeConfig config;
     
     public RegionalTradeEventHandlers(Main theMain, RegionalTradeConfig tradeConfig) {
