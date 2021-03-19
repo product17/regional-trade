@@ -49,6 +49,12 @@ public class RegionalTradeEventHandlers implements Listener {
         		newRecipe = enchantingTradeHandler(event, recipe, merchant, profession, villagerBiome);
         	default:
         	}
+        case MASON:
+        	// TODO : ONLY DO JOURNEYMAN BASED ON BIOME!
+        case CARTOGRAPHER:
+        	// TODO : conch shell at master but with a reduced replenish rate? (DIFFERENT MOD PROBABLY)
+        case FISHERMAN:
+        	// TODO : bucket of salmon at apprentice, buckets of random fancier fish at expert (DIFFERENT MOD PROBABLY)
         default:
         }
         
