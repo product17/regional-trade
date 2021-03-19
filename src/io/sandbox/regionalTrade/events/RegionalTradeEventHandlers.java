@@ -1,5 +1,6 @@
 package io.sandbox.regionalTrade.events;
 
+import io.sandbox.helpers.ItemHelper;
 import io.sandbox.helpers.OutputHelper;
 import io.sandbox.regionalTrade.Main;
 import io.sandbox.regionalTrade.RegionalTradeConfig;
@@ -29,13 +30,6 @@ public class RegionalTradeEventHandlers implements Listener {
 		config = tradeConfig;
 	}
 
-    private int getRandomNumberUsingInts(int min, int max) {
-        Random random = new Random();
-        int res = random.ints(min, max).findAny().getAsInt();
-        output.consoleInfo("RANDOM GOT: " + String.valueOf(res));
-        return res;
-    }
-
     @EventHandler
     public void onVillagerAcquiresTrade(VillagerAcquireTradeEvent event) {
         MerchantRecipe recipe = event.getRecipe();
@@ -55,11 +49,11 @@ public class RegionalTradeEventHandlers implements Listener {
         
         // Select a new enchantment.
         ArrayList<Enchantment> allowedEnchants = config.enchantList(profession, villagerBiome);
-        int selectedEnchantIndex = this.getRandomNumberUsingInts(0, allowedEnchants.size());
+        int selectedEnchantIndex = ItemHelper.getRandomInt(0, allowedEnchants.size() - 1);
         Enchantment selectedEnchant = allowedEnchants.get(selectedEnchantIndex);
         
         // Select a new enchantment level.
-        Integer level = this.getRandomNumberUsingInts(1, selectedEnchant.getMaxLevel() + 1);
+        Integer level = ItemHelper.getRandomInt(1, selectedEnchant.getMaxLevel());
         
         // Create a new result book item and add the enchant we selected to it.
         ItemStack newBook = new ItemStack(Material.ENCHANTED_BOOK);
@@ -70,7 +64,7 @@ public class RegionalTradeEventHandlers implements Listener {
         // Create a new recipe, set its ingredients.
         MerchantRecipe newRecipe = new MerchantRecipe(newBook, 1);
         newRecipe.addIngredient(new ItemStack(Material.BOOK));
-        newRecipe.addIngredient(new ItemStack(Material.EMERALD, this.getRandomNumberUsingInts(5, 65)));
+        newRecipe.addIngredient(new ItemStack(Material.EMERALD, ItemHelper.getWeightedEmeraldCost(selectedEnchant, level)));
         
         // Finally, set the resulting recipe to the event.
         event.setRecipe(newRecipe);
