@@ -43,6 +43,9 @@ public class RegionalTradeEventHandlers implements Listener {
 
         EnchantmentStorageMeta storedEnchantMeta = ((EnchantmentStorageMeta) recipe.getResult().getItemMeta());
         for (Enchantment enchant : storedEnchantMeta.getStoredEnchants().keySet()) { // This will loop even though in this case it would always only be one item.
+        	// We want the curses to just always be allowed on everything.
+        	if (enchant == Enchantment.BINDING_CURSE || enchant == Enchantment.VANISHING_CURSE) { return; }
+        	
         	// We can leave early if the merchant is allowed to learn the enchant.
         	if (config.canLearn(profession, villagerBiome, enchant)) { return; }
         }
