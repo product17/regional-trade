@@ -15,7 +15,6 @@ import org.bukkit.event.entity.VillagerAcquireTradeEvent;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.MerchantRecipe;
 import org.bukkit.inventory.meta.EnchantmentStorageMeta;
-import org.bukkit.inventory.meta.ItemMeta;
 
 import java.util.*;
 
@@ -55,38 +54,49 @@ public class RegionalTradeEventHandlers implements Listener {
     	ArrayList<Enchantment> allowedEnchants = config.enchantList(profession, villagerBiome);
         if (allowedEnchants.isEmpty()) { return; }
         
+        int merchantLevel = merchant.getVillagerLevel();
         Enchantment selectedEnchant = null;
-    	EnchantmentStorageMeta storedEnchantMeta = ((EnchantmentStorageMeta) recipe.getResult().getItemMeta());
-        for (Enchantment enchant : storedEnchantMeta.getStoredEnchants().keySet()) { // This will loop even though in this case it would always only be one item.
-        	// We want the curses to just always be allowed on everything.
-        	if (enchant == Enchantment.BINDING_CURSE || enchant == Enchantment.VANISHING_CURSE) { return; }
-        	
-        	// We can leave early if the merchant is allowed to learn the enchant.
-        	if (config.canLearn(profession, villagerBiome, enchant)) {
-        		selectedEnchant = enchant;
-        	}
-        }
+    	EnchantmentStorageMeta storedEnchantMeta = null;
+    	
+    	for (MerchantRecipe ownedRecipe : merchant.getRecipes()) {
+    		if (ownedRecipe.getResult().getType() != Material.ENCHANTED_BOOK) { continue; }
+    		
+    		storedEnchantMeta = (EnchantmentStorageMeta) recipe.getResult().getItemMeta();
+            for (Enchantment enchant : storedEnchantMeta.getStoredEnchants().keySet()) { // This will loop even though in this case it would always only be one item.
+            	selectedEnchant = enchant;
+            	break;
+            }
+    	}
         
-        // Select a new enchantment if the one we had was not allowed.
-        if (selectedEnchant == null) {
-        	int selectedEnchantIndex = ItemHelper.getRandomInt(0, allowedEnchants.size() - 1);
-        	selectedEnchant = allowedEnchants.get(selectedEnchantIndex);
-        }
+    	if (selectedEnchant == null) {
+    		storedEnchantMeta = (EnchantmentStorageMeta) recipe.getResult().getItemMeta();
+            for (Enchantment enchant : storedEnchantMeta.getStoredEnchants().keySet()) { // This will loop even though in this case it would always only be one item.
+            	// We want the curses to just always be allowed on everything.
+            	if (enchant == Enchantment.BINDING_CURSE || enchant == Enchantment.VANISHING_CURSE) { return; }
+            	
+            	// We can leave early if the merchant is allowed to learn the enchant.
+            	if (config.canLearn(profession, villagerBiome, enchant)) {
+            		selectedEnchant = enchant;
+            	}
+            }
+            
+            // Select a new enchantment if the one we had was not allowed.
+            if (selectedEnchant == null) {
+            	int selectedEnchantIndex = ItemHelper.getRandomInt(0, allowedEnchants.size() - 1);
+            	selectedEnchant = allowedEnchants.get(selectedEnchantIndex);
+            }
+    	}
         
         // Select a new enchantment level.
         int levelOffset = 5 - selectedEnchant.getMaxLevel();
-        Integer level = merchant.getVillagerLevel() - levelOffset;
+        Integer level = merchantLevel - levelOffset;
         
         // Create a new result book item and add the enchant we selected to it.
-        ItemStack newBook = null;
+        ItemStack newBook = new ItemStack(Material.ENCHANTED_BOOK);
+        storedEnchantMeta = (EnchantmentStorageMeta) newBook.getItemMeta();
         if (level > 0) {
-        	newBook = new ItemStack(Material.ENCHANTED_BOOK);
-            storedEnchantMeta = (EnchantmentStorageMeta) newBook.getItemMeta();
             storedEnchantMeta.addEnchant(selectedEnchant, level, false);
-            newBook.setItemMeta(storedEnchantMeta);
         } else {
-        	newBook = new ItemStack(Material.ENCHANTED_BOOK);
-            ItemMeta itemMeta = newBook.getItemMeta();
             String levelName = "";
             switch (levelOffset) {
             case 1:
@@ -101,15 +111,19 @@ public class RegionalTradeEventHandlers implements Listener {
             case 4:
             	levelName = "MASTER (5)";
             }
-            itemMeta.setDisplayName(ItemHelper.enchantToName(selectedEnchant) + "  @  " + levelName);
-            newBook.setItemMeta(itemMeta);
+            storedEnchantMeta.addEnchant(selectedEnchant, 1, false);
+            storedEnchantMeta.setDisplayName("GAINED AT  @  " + levelName);
         }
+        newBook.setItemMeta(storedEnchantMeta);
         
         // Create a new recipe, set its ingredients.
         MerchantRecipe newRecipe = new MerchantRecipe(newBook, 1);
         newRecipe.addIngredient(new ItemStack(Material.BOOK));
         newRecipe.addIngredient(new ItemStack(Material.EMERALD, ItemHelper.getWeightedEmeraldCost(selectedEnchant, level)));
-        newRecipe.setMaxUses(0);
+        
+        if (level <= 0) {
+        	newRecipe.setMaxUses(0);
+        }
         
         // Finally, set the resulting recipe to the event.
         event.setRecipe(newRecipe);
