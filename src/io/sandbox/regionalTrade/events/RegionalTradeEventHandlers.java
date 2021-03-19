@@ -15,6 +15,8 @@ import org.bukkit.event.entity.VillagerAcquireTradeEvent;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.MerchantRecipe;
 import org.bukkit.inventory.meta.EnchantmentStorageMeta;
+import org.bukkit.inventory.meta.ItemMeta;
+
 import java.util.*;
 
 public class RegionalTradeEventHandlers implements Listener {
@@ -72,21 +74,42 @@ public class RegionalTradeEventHandlers implements Listener {
         }
         
         // Select a new enchantment level.
-        Integer level = merchant.getVillagerLevel();
-        if (level > selectedEnchant.getMaxLevel()) {
-        	level = selectedEnchant.getMaxLevel();
-        }
+        int levelOffset = 5 - selectedEnchant.getMaxLevel();
+        Integer level = merchant.getVillagerLevel() - levelOffset;
         
         // Create a new result book item and add the enchant we selected to it.
-        ItemStack newBook = new ItemStack(Material.ENCHANTED_BOOK);
-        storedEnchantMeta = (EnchantmentStorageMeta) newBook.getItemMeta();
-        storedEnchantMeta.addEnchant(selectedEnchant, level, false);
-        newBook.setItemMeta(storedEnchantMeta);
+        ItemStack newBook = null;
+        if (level > 0) {
+        	newBook = new ItemStack(Material.ENCHANTED_BOOK);
+            storedEnchantMeta = (EnchantmentStorageMeta) newBook.getItemMeta();
+            storedEnchantMeta.addEnchant(selectedEnchant, level, false);
+            newBook.setItemMeta(storedEnchantMeta);
+        } else {
+        	newBook = new ItemStack(Material.PAPER);
+            ItemMeta itemMeta = newBook.getItemMeta();
+            String levelName = "";
+            switch (levelOffset) {
+            case 1:
+            	levelName = "APPRENTICE (2)";
+            	break;
+            case 2:
+            	levelName = "JOURNEYMAN (3)";
+            	break;
+            case 3:
+            	levelName = "EXPERT (4)";
+            	break;
+            case 4:
+            	levelName = "MASTER (5)";
+            }
+            itemMeta.setDisplayName(ItemHelper.enchantToName(selectedEnchant) + "  @  " + levelName);
+            newBook.setItemMeta(itemMeta);
+        }
         
         // Create a new recipe, set its ingredients.
         MerchantRecipe newRecipe = new MerchantRecipe(newBook, 1);
         newRecipe.addIngredient(new ItemStack(Material.BOOK));
         newRecipe.addIngredient(new ItemStack(Material.EMERALD, ItemHelper.getWeightedEmeraldCost(selectedEnchant, level)));
+        newRecipe.setMaxUses(0);
         
         // Finally, set the resulting recipe to the event.
         event.setRecipe(newRecipe);
