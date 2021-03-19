@@ -138,9 +138,10 @@ public class RegionalTradeEventHandlers implements Listener {
         // Create a new recipe, set its ingredients.
         MerchantRecipe newRecipe = new MerchantRecipe(newBook, 1);
         newRecipe.addIngredient(new ItemStack(Material.BOOK));
-        newRecipe.addIngredient(new ItemStack(Material.EMERALD, ItemHelper.getWeightedEmeraldCost(selectedEnchant, level)));
         
-        if (level <= 0) {
+        if (level > 0) {
+        	newRecipe.addIngredient(new ItemStack(Material.EMERALD, ItemHelper.getWeightedEmeraldCost(selectedEnchant, level)));
+        } else {
         	newRecipe.setMaxUses(0);
         }
         
