@@ -85,7 +85,7 @@ public class RegionalTradeEventHandlers implements Listener {
             storedEnchantMeta.addEnchant(selectedEnchant, level, false);
             newBook.setItemMeta(storedEnchantMeta);
         } else {
-        	newBook = new ItemStack(Material.PAPER);
+        	newBook = new ItemStack(Material.ENCHANTED_BOOK);
             ItemMeta itemMeta = newBook.getItemMeta();
             String levelName = "";
             switch (levelOffset) {
