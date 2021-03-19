@@ -31,7 +31,9 @@ public class RegionalTradeEventHandlers implements Listener {
 
     private int getRandomNumberUsingInts(int min, int max) {
         Random random = new Random();
-        return random.ints(min, max).findFirst().getAsInt();
+        int res = random.ints(min, max).findAny().getAsInt();
+        output.consoleInfo("RANDOM GOT: " + String.valueOf(res));
+        return res;
     }
 
     @EventHandler
@@ -53,20 +55,22 @@ public class RegionalTradeEventHandlers implements Listener {
         
         // Select a new enchantment.
         ArrayList<Enchantment> allowedEnchants = config.enchantList(profession, villagerBiome);
-        int selectedEnchantIndex = this.getRandomNumberUsingInts(0, allowedEnchants.size() - 1);
+        int selectedEnchantIndex = this.getRandomNumberUsingInts(0, allowedEnchants.size());
         Enchantment selectedEnchant = allowedEnchants.get(selectedEnchantIndex);
         
         // Select a new enchantment level.
-        Integer level = this.getRandomNumberUsingInts(1, selectedEnchant.getMaxLevel());
+        Integer level = this.getRandomNumberUsingInts(1, selectedEnchant.getMaxLevel() + 1);
         
         // Create a new result book item and add the enchant we selected to it.
         ItemStack newBook = new ItemStack(Material.ENCHANTED_BOOK);
-        newBook.addEnchantment(selectedEnchant, level);
+        storedEnchantMeta = (EnchantmentStorageMeta) newBook.getItemMeta();
+        storedEnchantMeta.addEnchant(selectedEnchant, level, false);
+        newBook.setItemMeta(storedEnchantMeta);
         
         // Create a new recipe, set its ingredients.
         MerchantRecipe newRecipe = new MerchantRecipe(newBook, 1);
         newRecipe.addIngredient(new ItemStack(Material.BOOK));
-        newRecipe.addIngredient(new ItemStack(Material.EMERALD, 3));
+        newRecipe.addIngredient(new ItemStack(Material.EMERALD, this.getRandomNumberUsingInts(5, 65)));
         
         // Finally, set the resulting recipe to the event.
         event.setRecipe(newRecipe);
