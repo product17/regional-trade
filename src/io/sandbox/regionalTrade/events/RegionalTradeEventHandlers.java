@@ -1,14 +1,11 @@
 package io.sandbox.regionalTrade.events;
 
-import io.sandbox.helpers.ItemHelper;
 import io.sandbox.helpers.Output;
 import io.sandbox.regionalTrade.Main;
 import io.sandbox.regionalTrade.RegionalTradeConfig;
 
 import org.bukkit.Material;
 import org.bukkit.Server;
-import org.bukkit.configuration.ConfigurationSection;
-import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.Villager;
 import org.bukkit.event.EventHandler;
