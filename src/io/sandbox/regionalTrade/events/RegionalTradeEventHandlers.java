@@ -5,13 +5,16 @@ import io.sandbox.helpers.OutputHelper;
 import io.sandbox.regionalTrade.Main;
 import io.sandbox.regionalTrade.RegionalTradeConfig;
 
+import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.Server;
+import org.bukkit.block.Biome;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.Villager;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.entity.VillagerAcquireTradeEvent;
+import org.bukkit.event.entity.VillagerReplenishTradeEvent;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.MerchantRecipe;
 import org.bukkit.inventory.meta.EnchantmentStorageMeta;
@@ -52,6 +55,16 @@ public class RegionalTradeEventHandlers implements Listener {
         if (newRecipe == null) { return; }
         
         event.setRecipe(newRecipe);
+    }
+    
+    @EventHandler
+    public void onVillagerReplenishTrade(VillagerReplenishTradeEvent event) {
+    	Villager merchant = (Villager) event.getEntity();
+    	Location merchLoc = merchant.getLocation();
+    	Biome biome = merchant.getWorld().getBiome(merchLoc.getBlockX(), merchLoc.getBlockY(), merchLoc.getBlockZ());
+    	if (merchant.getType().toString() != biome.toString()) {
+    		event.setCancelled(true);
+    	}
     }
     
     private MerchantRecipe enchantingTradeHandler(VillagerAcquireTradeEvent event, MerchantRecipe recipe, Villager merchant, Villager.Profession profession, Villager.Type villagerBiome) {
