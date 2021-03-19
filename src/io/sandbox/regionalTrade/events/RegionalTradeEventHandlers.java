@@ -37,22 +37,29 @@ public class RegionalTradeEventHandlers implements Listener {
         Villager merchant = (Villager) event.getEntity();
         Villager.Profession profession = merchant.getProfession();
         Villager.Type villagerBiome = merchant.getVillagerType();
-        
+        MerchantRecipe newRecipe = null;
+
         switch (profession) {
         case LIBRARIAN:
         	switch (recipe.getResult().getType()) {
         	case ENCHANTED_BOOK:
-        		enchantingTradeHandler(event, recipe, merchant, profession, villagerBiome);
+        		newRecipe = enchantingTradeHandler(event, recipe, merchant, profession, villagerBiome);
         	default:
         	}
         default:
         }
+        
+        if (newRecipe == null) { return; }
+        
+        event.setRecipe(newRecipe);
     }
     
-    private void enchantingTradeHandler(VillagerAcquireTradeEvent event, MerchantRecipe recipe, Villager merchant, Villager.Profession profession, Villager.Type villagerBiome) {
+    private MerchantRecipe enchantingTradeHandler(VillagerAcquireTradeEvent event, MerchantRecipe recipe, Villager merchant, Villager.Profession profession, Villager.Type villagerBiome) {
     	// If there are no allowed enchants listed then we should allow the default game behavior.
     	ArrayList<Enchantment> allowedEnchants = config.enchantList(profession, villagerBiome);
-        if (allowedEnchants.isEmpty()) { return; }
+    	output.consoleInfo(villagerBiome.toString());
+    	output.consoleInfo(allowedEnchants.toString());
+        if (allowedEnchants.isEmpty()) { return null; }
         
         int merchantLevel = merchant.getVillagerLevel();
         Enchantment selectedEnchant = null;
@@ -68,11 +75,11 @@ public class RegionalTradeEventHandlers implements Listener {
             }
     	}
         
-    	if (selectedEnchant == null) {
+    	if (selectedEnchant == null || selectedEnchant == Enchantment.BINDING_CURSE || selectedEnchant == Enchantment.VANISHING_CURSE) {
     		storedEnchantMeta = (EnchantmentStorageMeta) recipe.getResult().getItemMeta();
             for (Enchantment enchant : storedEnchantMeta.getStoredEnchants().keySet()) { // This will loop even though in this case it would always only be one item.
             	// We want the curses to just always be allowed on everything.
-            	if (enchant == Enchantment.BINDING_CURSE || enchant == Enchantment.VANISHING_CURSE) { return; }
+            	if (enchant == Enchantment.BINDING_CURSE || enchant == Enchantment.VANISHING_CURSE) { return null; }
             	
             	// We can leave early if the merchant is allowed to learn the enchant.
             	if (config.canLearn(profession, villagerBiome, enchant)) {
@@ -125,7 +132,7 @@ public class RegionalTradeEventHandlers implements Listener {
         	newRecipe.setMaxUses(0);
         }
         
-        // Finally, set the resulting recipe to the event.
-        event.setRecipe(newRecipe);
+        // Finally, return the resulting recipe.
+        return newRecipe;
     }
 }
