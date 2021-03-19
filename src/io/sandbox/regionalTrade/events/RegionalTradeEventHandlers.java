@@ -57,8 +57,6 @@ public class RegionalTradeEventHandlers implements Listener {
     private MerchantRecipe enchantingTradeHandler(VillagerAcquireTradeEvent event, MerchantRecipe recipe, Villager merchant, Villager.Profession profession, Villager.Type villagerBiome) {
     	// If there are no allowed enchants listed then we should allow the default game behavior.
     	ArrayList<Enchantment> allowedEnchants = config.enchantList(profession, villagerBiome);
-    	output.consoleInfo(villagerBiome.toString());
-    	output.consoleInfo(allowedEnchants.toString());
         if (allowedEnchants.isEmpty()) { return null; }
         
         int merchantLevel = merchant.getVillagerLevel();
@@ -75,7 +73,7 @@ public class RegionalTradeEventHandlers implements Listener {
             	break;
             }
     	}
-        
+
     	if (selectedEnchant == null || selectedEnchant == Enchantment.BINDING_CURSE || selectedEnchant == Enchantment.VANISHING_CURSE) {
     		storedEnchantMeta = (EnchantmentStorageMeta) recipe.getResult().getItemMeta();
             for (Enchantment enchant : storedEnchantMeta.getStoredEnchants().keySet()) { // This will loop even though in this case it would always only be one item.
@@ -103,7 +101,7 @@ public class RegionalTradeEventHandlers implements Listener {
         ItemStack newBook = new ItemStack(Material.ENCHANTED_BOOK);
         storedEnchantMeta = (EnchantmentStorageMeta) newBook.getItemMeta();
         if (level > 0) {
-            storedEnchantMeta.addEnchant(selectedEnchant, level, false);
+            storedEnchantMeta.addStoredEnchant(selectedEnchant, level, false);
         } else {
             String levelName = "";
             switch (levelOffset) {
@@ -119,8 +117,8 @@ public class RegionalTradeEventHandlers implements Listener {
             case 4:
             	levelName = "MASTER (5)";
             }
-            storedEnchantMeta.addEnchant(selectedEnchant, 1, false);
-            storedEnchantMeta.setDisplayName("GAINED AT  @  " + levelName);
+            storedEnchantMeta.addStoredEnchant(selectedEnchant, 1, false);
+            storedEnchantMeta.setDisplayName("UNLOCK  @  " + levelName);
         }
         newBook.setItemMeta(storedEnchantMeta);
         
