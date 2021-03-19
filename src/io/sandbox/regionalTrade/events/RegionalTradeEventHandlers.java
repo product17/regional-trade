@@ -33,15 +33,27 @@ public class RegionalTradeEventHandlers implements Listener {
     @EventHandler
     public void onVillagerAcquiresTrade(VillagerAcquireTradeEvent event) {
         MerchantRecipe recipe = event.getRecipe();
-        if (recipe.getResult().getType() != Material.ENCHANTED_BOOK) {
-            return; // cut out early, we only care about enchanted_books for now
-        }
-        
         Villager merchant = (Villager) event.getEntity();
         Villager.Profession profession = merchant.getProfession();
         Villager.Type villagerBiome = merchant.getVillagerType();
-
-        EnchantmentStorageMeta storedEnchantMeta = ((EnchantmentStorageMeta) recipe.getResult().getItemMeta());
+        
+        switch (profession) {
+        case LIBRARIAN:
+        	switch (recipe.getResult().getType()) {
+        	case ENCHANTED_BOOK:
+        		enchantingTradeHandler(event, recipe, profession, villagerBiome);
+        	default:
+        	}
+        default:
+        }
+    }
+    
+    private void enchantingTradeHandler(VillagerAcquireTradeEvent event, MerchantRecipe recipe, Villager.Profession profession, Villager.Type villagerBiome) {
+    	// If there are no allowed enchants listed then we should allow all enchants.
+    	ArrayList<Enchantment> allowedEnchants = config.enchantList(profession, villagerBiome);
+        if (allowedEnchants.isEmpty()) { return; }
+    	
+    	EnchantmentStorageMeta storedEnchantMeta = ((EnchantmentStorageMeta) recipe.getResult().getItemMeta());
         for (Enchantment enchant : storedEnchantMeta.getStoredEnchants().keySet()) { // This will loop even though in this case it would always only be one item.
         	// We want the curses to just always be allowed on everything.
         	if (enchant == Enchantment.BINDING_CURSE || enchant == Enchantment.VANISHING_CURSE) { return; }
@@ -51,7 +63,6 @@ public class RegionalTradeEventHandlers implements Listener {
         }
         
         // Select a new enchantment.
-        ArrayList<Enchantment> allowedEnchants = config.enchantList(profession, villagerBiome);
         int selectedEnchantIndex = ItemHelper.getRandomInt(0, allowedEnchants.size() - 1);
         Enchantment selectedEnchant = allowedEnchants.get(selectedEnchantIndex);
         
