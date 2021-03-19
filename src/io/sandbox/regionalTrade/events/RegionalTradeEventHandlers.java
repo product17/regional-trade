@@ -45,7 +45,7 @@ public class RegionalTradeEventHandlers implements Listener {
         Villager.Type villagerBiome = merchant.getVillagerType();
 
         EnchantmentStorageMeta storedEnchantMeta = ((EnchantmentStorageMeta) recipe.getResult().getItemMeta());
-        for (Enchantment enchant : storedEnchantMeta.getStoredEnchants().keySet()) {
+        for (Enchantment enchant : storedEnchantMeta.getStoredEnchants().keySet()) { // This will loop even though in this case it would always only be one item.
         	// We can leave early if the merchant is allowed to learn the enchant.
         	if (config.canLearn(profession, villagerBiome, enchant)) { return; }
         }
