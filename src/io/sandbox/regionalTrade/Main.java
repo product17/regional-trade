@@ -1,7 +1,7 @@
 package io.sandbox.regionalTrade;
 
 import io.sandbox.helpers.ItemHelper;
-import io.sandbox.helpers.Output;
+import io.sandbox.helpers.OutputHelper;
 import io.sandbox.regionalTrade.events.RegionalTradeEventHandlers;
 
 import java.util.List;
@@ -15,13 +15,13 @@ import org.bukkit.plugin.java.JavaPlugin;
 
 public class Main extends JavaPlugin {
 	Server server;
-	Output output;
+	OutputHelper output;
 	RegionalTradeConfig tradeConfig;
 
     @Override
     public void onEnable() {
     	server = this.getServer();
-		output = new Output(server);
+		output = new OutputHelper(server);
 		
 		output.consoleInfo("RegionalTrade is loading its config...");
 		this.loadConfig();

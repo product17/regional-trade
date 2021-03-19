@@ -1,7 +1,6 @@
 package io.sandbox.regionalTrade.events;
 
-import io.sandbox.helpers.ItemHelper;
-import io.sandbox.helpers.Output;
+import io.sandbox.helpers.OutputHelper;
 import io.sandbox.regionalTrade.Main;
 import io.sandbox.regionalTrade.RegionalTradeConfig;
 
@@ -15,18 +14,17 @@ import org.bukkit.event.entity.VillagerAcquireTradeEvent;
 import org.bukkit.inventory.MerchantRecipe;
 import org.bukkit.inventory.meta.EnchantmentStorageMeta;
 import java.util.*;
-import java.util.Map.Entry;
 
 public class RegionalTradeEventHandlers implements Listener {
 	Main main;
 	Server server;
-	Output output;
+	OutputTo output;
 	RegionalTradeConfig config;
     
     public RegionalTradeEventHandlers(Main theMain, RegionalTradeConfig tradeConfig) {
 		main = theMain;
 		server = main.getServer();
-		output = new Output(server);
+		output = new OutputHelper(server);
 		config = tradeConfig;
 	}
 
@@ -47,8 +45,6 @@ public class RegionalTradeEventHandlers implements Listener {
         Villager.Type villagerBiome = merchant.getVillagerType();
 
         EnchantmentStorageMeta storedEnchantMeta = ((EnchantmentStorageMeta) recipe.getResult().getItemMeta());
-        Enchantment enchantToRemove;
-        Integer enchantToRemoveLevel;
         for (Enchantment enchant : storedEnchantMeta.getStoredEnchants().keySet()) { // This will loop even though in this case it would always only be one item.
         	// We can leave early if the merchant is allowed to learn the enchant.
         	if (config.canLearn(profession, villagerBiome, enchant)) { return; }
