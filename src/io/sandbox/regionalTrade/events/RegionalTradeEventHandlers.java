@@ -49,7 +49,7 @@ public class RegionalTradeEventHandlers implements Listener {
     }
     
     private void enchantingTradeHandler(VillagerAcquireTradeEvent event, MerchantRecipe recipe, Villager.Profession profession, Villager.Type villagerBiome) {
-    	// If there are no allowed enchants listed then we should allow the dafault game behavior.
+    	// If there are no allowed enchants listed then we should allow the default game behavior.
     	ArrayList<Enchantment> allowedEnchants = config.enchantList(profession, villagerBiome);
         if (allowedEnchants.isEmpty()) { return; }
     	
